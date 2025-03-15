@@ -1,11 +1,12 @@
-version: '3.1'
+version: "3.1"
 
 networks:
   network-zabbix:
+    name: network-zabbix
     driver: bridge
 
 volumes:
-    prometheus_data: {}
+  prometheus_data: {}
 
 services:
   mysql:
@@ -14,9 +15,9 @@ services:
     networks:
       - network-zabbix
     ports:
-      - '3306:3306'
+      - "3306:3306"
     volumes:
-      - './zabbix/mysql:/var/lib/data'
+      - "./zabbix/mysql:/var/lib/data"
     environment:
       - MYSQL_ROOT_PASSWORD=carryontech
       - MYSQL_DATABASE=zabbix
@@ -32,9 +33,9 @@ services:
       - mysql
     restart: always
     ports:
-      - '10051:10051'
+      - "10051:10051"
     volumes:
-      - './zabbix/alertscripts:/usr/lib/zabbix/alertscripts'
+      - "./zabbix/alertscripts:/usr/lib/zabbix/alertscripts"
     environment:
       - DB_SERVER_HOST=mysql
       - MYSQL_DATABASE=zabbix
@@ -52,8 +53,8 @@ services:
       - mysql
     restart: always
     ports:
-      - '80:8080'
-      - '443:8443'
+      - "80:8080"
+      - "443:8443"
     environment:
       - DB_SERVER_HOST=mysql
       - MYSQL_DATABASE=zabbix
@@ -69,26 +70,26 @@ services:
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
     ports:
       - 9090:9090
     links:
       - cadvisor:cadvisor
       - alertmanager:alertmanager
-#      - pushgateway:pushgateway
+    #      - pushgateway:pushgateway
     depends_on:
       - cadvisor
-#      - pushgateway
+    #      - pushgateway
     networks:
       - network-zabbix
     restart: always
-#    deploy:
-#      placement:
-#        constraints:
-#          - node.hostname == ${HOSTNAME}
+  #    deploy:
+  #      placement:
+  #        constraints:
+  #          - node.hostname == ${HOSTNAME}
 
   node-exporter:
     image: quay.io/prometheus/node-exporter:latest
@@ -97,10 +98,10 @@ services:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
       - /:/host:ro,rslave
-    command: 
-      - '--path.rootfs=/host'
-      - '--path.procfs=/host/proc' 
-      - '--path.sysfs=/host/sys'
+    command:
+      - "--path.rootfs=/host"
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
       - --collector.filesystem.ignored-mount-points
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
     ports:
@@ -121,12 +122,12 @@ services:
       - network-zabbix
     restart: always
     command:
-      - '--config.file=/etc/alertmanager/config.yml'
-      - '--storage.path=/alertmanager'
-#    deploy:
-#      placement:
-#        constraints:
-#          - node.hostname == ${HOSTNAME}
+      - "--config.file=/etc/alertmanager/config.yml"
+      - "--storage.path=/alertmanager"
+  #    deploy:
+  #      placement:
+  #        constraints:
+  #          - node.hostname == ${HOSTNAME}
   cadvisor:
     image: gcr.io/cadvisor/cadvisor
     volumes:
@@ -141,7 +142,7 @@ services:
     restart: always
     deploy:
       mode: global
-   
+
   grafana:
     container_name: grafana
     image: grafana/grafana
@@ -152,8 +153,8 @@ services:
       - zabbix-server
     restart: always
     ports:
-      - '3000:3000'
-    environment: 
+      - "3000:3000"
+    environment:
       - GF_INSTALL_PLUGINS=alexanderzobnin-zabbix-app
     depends_on:
       - mysql
@@ -172,7 +173,8 @@ services:
     volumes:
       - /var/run:/var/run
     ports:
-      - '10050:10050'
+      - "10050:10050"
+      - "10051:10051"
     environment:
       - ZBX_HOSTNAME=Zabbix server
       - ZBX_SERVER_HOST=172.18.0.1
